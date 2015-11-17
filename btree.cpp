@@ -15,7 +15,7 @@ struct B_TreeNode
     int n;
 }*root = NULL, *np = NULL, *x = NULL;
 
-B_TreeNode * init()
+B_TreeNode * init_tree()
 {
     int i;
     np = new B_TreeNode;
@@ -67,14 +67,14 @@ int split_child(B_TreeNode *x, int i)
 {
     int j, mid;
     B_TreeNode *np1, *np3, *y;
-    np3 = init();
+    np3 = init_tree();
     np3->leaf = true;
     if (i == -1)
     {
         mid = x->data[2];
         x->data[2] = 0;
         x->n--;
-        np1 = init();
+        np1 = init_tree();
         np1->leaf = false;
         x->leaf = true;
         for (j = 3; j < 5; j++)
@@ -119,7 +119,7 @@ void insert(int a)
     x = root;
     if (x == NULL)
     {
-        root = init();
+        root = init_tree();
         x = root;
     }
     else
@@ -184,19 +184,20 @@ void insert(int a)
     sort(x->data, x->n);
     x->n++;
 }
-int main()
-{
-    int i, n, t;
-    cout<<"enter the no of elements to be inserted\n";
-    cin>>n;
-    for(i = 0; i < n; i++)
-    {
-        cout<<"enter the element\n";
-        cin>>t;
-        insert(t);
-    }
-    cout<<"traversal of constructed tree\n";
-    traverse(root);
-    //getch();
-    return 1;
-}
+
+// int main()
+// {
+//     int i, n, t;
+//     cout<<"enter the no of elements to be inserted\n";
+//     cin>>n;
+//     for(i = 0; i < n; i++)
+//     {
+//         cout<<"enter the element\n";
+//         cin>>t;
+//         insert(t);
+//     }
+//     cout<<"traversal of constructed tree\n";
+//     traverse(root);
+//     //getch();
+//     return 1;
+// }

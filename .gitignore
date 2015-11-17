@@ -1,5 +1,6 @@
 datablock
 btree
+execute
 *.part
 *.txt
 docs/*

@@ -3,8 +3,7 @@ CXX = g++
 CFLAGS = -Wall -g -O3
 
 all:
-	$(CXX) $(CFLAGS) datablock.c -o datablock
-	$(CXX) $(CFLAGS) btree.cpp -o btree
+	$(CXX) $(CFLAGS) execute.cpp -o execute
 
 clean:
-	rm datablock btree
+	rm datablock btree execute
