@@ -27,8 +27,6 @@ void cat(char *path);
 void ls(char *parametro,char *path);
 void mkdir_create(char *path,int isFile);
 
-
-
 const char dir_separator[2] = "/";
 /* Our structure */
 /* tabela FAT, 1024 entradas de 32 bits */
@@ -52,10 +50,150 @@ dir_entry root_dir_cluster[128];
 
 FILE *ptr_myfile;
 
+
+
+
+int main(){
+    //create_file();
+    char input[5000];
+    char *comando;
+    char *parametro1;
+    char *parametro2;
+
+    while(1){
+        printf(">> ");
+        scanf(" %[^\n]s",input);
+
+        /* get the first token */
+
+        comando = strtok(input, " ");
+        parametro1 = strtok(NULL," ");
+        parametro2 = strtok(NULL," ");
+
+
+        if(strcmp(comando,"help")==0){
+            if(parametro1 == NULL){
+                printf("Lista de comandos implementados:\n\n");
+                printf("init\nload\nls\nmkdir\nrmdir\ncreate\nrm\nwrite\ncat\nhelp\nman\n\n");
+                printf("Para obter informacoes mais detalhadas dos comandos digite: man <comando>\n");
+            }
+            else{
+                printf("O comando help nao possui parametros.\n");
+            }
+        }
+        else if(strcmp(comando,"man")==0){
+            if(parametro1 == NULL){
+                printf("Numero de argumentos incorreto.\n\n");
+                printf("Sintaxe: man <comando>\n");
+            }
+            else if(strcmp(parametro1,"init")==0){
+                printf("O comando init cria um arquivo chamado fat.part com 4mb de tamanho.\n");
+                printf("Estrutura do arquivo:\n");
+                printf("================\n");
+                printf("||    boot    ||\n");
+                printf("||------------||\n");
+                printf("||    FAT     ||\n");
+                printf("||------------||\n");
+                printf("||  root_dir  ||\n");
+                printf("||------------||\n");
+                printf("||   DADOS    ||\n");
+                printf("================\n");
+                printf("O arquivo esta dividido em blocos de dados, sendo que cada bloco possui o tamanho de 4kb.\n");
+                printf("O primeiro bloco contém o boot do sistema\n.");
+                printf("O segundo bloco contem a tabela FAT.\n\t Cada entrada na tabela pode conter 3 tipos diferentes de valores:\n");
+                printf("\t0x00000000 --> cluster livre\n");
+                printf("\t0x00000002 até 0xfffffffe--> posicao do proximo cluster a ser lido\n");
+                printf("\t0xffffffff --> fim de arquivo\n");
+                printf("O terceiro bloco contém o root_dir, o qual pode contem 128 entradas de diretorio(32 bytes cada).\n");
+            }
+            else if(strcmp(parametro1,"load")==0){
+                printf("O comando load carrega o arquivo fat.part para a memoria caso este exista.\n");
+            }
+            else if(strcmp(parametro1,"ls")==0){
+                printf("O comando ls lista todos os arquivos e diretórios contidos no diretório especificado.\n");
+                printf("Parametros:\n");
+                printf("-a --> lista tudo, incluindo arquivos ocultos.\n");
+                printf("-d --> lista somente diretorios.\n");
+                printf("-f --> lista somente arquivos.\n\n");
+                printf("Sintaxe: ls <caminho/do/diretorio> -<parametro>\n");
+            }
+            else if(strcmp(parametro1,"mkdir")==0){
+                printf("Cria um diretorio no path especificado, se este não existir.\n\n");
+                printf("Sintaxe: mkdir path/<nome_diretorio>\n");
+            }
+            else if(strcmp(parametro1,"rmdir")==0){
+                printf("Remove o diretorio no path especificado, se este existir.\n\n");
+                printf("Sintaxe: rmdir path/<nome_diretorio>\n");
+            }
+            else if(strcmp(parametro1,"create")==0){
+                printf("Cria um arquivo no path especificado, se este não existir.\n\n");
+                printf("Sintaxe: create path/<nome_arquivo>\n");
+            }
+            else if(strcmp(parametro1,"rm")==0){
+                printf("Remove o arquivo no path especificado, se este existir.\n\n");
+                printf("Sintaxe: rm path/<nome_arquivo>\n");
+            }
+            else if(strcmp(parametro1,"write")==0){
+                printf("Escreve a string digitada no arquivo escolhido, se este existir.\n\n");
+                printf("Sintaxe: write \"string\" path/<nome_arquivo>\n");
+            }
+            else if(strcmp(parametro1,"cat")==0){
+                printf("Lista o conteudo do arquivo escolhido, se este existir.\n\n");
+                printf("Sintaxe: cat path/<nome_arquivo>\n");
+            }else if(strcmp(comando,"exit")==0){
+                return 0;
+            }
+        }
+
+        else if(strcmp(comando,"init")==0){
+            if(parametro1 != NULL){
+                printf("O comando init nao possui parametros.\n");
+            }
+            init();
+        }
+        else if(strcmp(comando,"load")==0){
+            load();
+        }
+        else if(strcmp(comando,"ls")==0){
+            ls(parametro1,parametro2);
+        }
+        else if(strcmp(comando,"mkdir")==0){
+            mkdir_create(parametro1,1);
+            //varrer_disco_por_setor();
+        }
+        else if(strcmp(comando,"rmdir")==0){
+            rmdir(parametro1);
+        }
+        else if(strcmp(comando,"create")==0){
+            mkdir_create(parametro1,0);
+        }
+        else if(strcmp(comando,"rm")==0){
+            rmdarnis(parametro1);
+        }
+        else if(strcmp(comando,"write")==0){
+            write(parametro1,parametro2);
+        }
+        else if(strcmp(comando,"cat")==0){
+            cat(parametro1);
+        }
+        else if(strcmp(comando,"varrer")==0){
+            varrer_disco_por_setor();
+        }
+        else if(strcmp(comando,"exit")==0){
+            fclose(ptr_myfile);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+
+
+
 void carrega_fat_struct(){
     fseek(ptr_myfile, 4096 ,SEEK_SET);
     int counter;
-    uint32_t value;
+
     for (counter = 0; counter < 1024;counter ++) {
         fread(&fat[counter], sizeof(4),1,ptr_myfile);
     }
@@ -106,13 +244,6 @@ void init()
     for(i=3; i<1024; i++){
         fat[i] = 0x00000000;
     }
-
-    /* inicializa o root dir
-        root dir é o array, já está inicializado nas váriaveis globais
-    */
-    dir_entry root_dir;
-
-    int counter;
 
     /* grava todos clusters em disco */
     //ps: não sei se o segundo parametro está correto "size -- This is the size in bytes of each element to be written.".
@@ -204,10 +335,8 @@ void varrer_disco_por_setor(){
 //metodo que carrega em root_dir_cluster a estrutura de diretorios do ultimo diretorio indicado pelo path e retorna o numero do cluster
 //se ultimo elemento do path for um arquivo, retornara o cluster a estrutura de diretorios do diretorio onde o arquivo esta.
 int go_to_cluster(char *path){
-    char *filename;
     char *token;
     int block_dir = 2;
-    int achou=0;
 
     carrega_dir_struct(2);
 
@@ -217,14 +346,12 @@ int go_to_cluster(char *path){
         int i;
         for(i = 0; i < 128; i++){
             if(strcmp((const char*) root_dir_cluster[i].filename,token)==0 && (int)root_dir_cluster[i].attributes == 0b00001000){
-                achou = 1;
                 block_dir = root_dir_cluster[i].first_block;
                 break;
             }
         }
 
         carrega_dir_struct(block_dir);
-        filename = token;
         token = strtok(NULL, dir_separator);
     }
 
@@ -438,7 +565,6 @@ void rmdir(char *path){
 }
 
 int count_free_pos_in_fat(){
-    int prox_pos;
     int i;
     int counter = 0;
     for (i = 0; i < 1024; i++) {
@@ -661,11 +787,9 @@ void cat(char *path){
 
 
 void ls(char *parametro,char *path){
-    char *filename;
     char *token;
     const char *token_parameter_ls;
     int block_dir = 2;
-    int achou=0;
 
     if (path == NULL){
         path = parametro;
@@ -689,14 +813,12 @@ void ls(char *parametro,char *path){
         int i;
         for(i = 0; i < 128; i++){
             if(strcmp((const char*) root_dir_cluster[i].filename,token)==0){
-                achou = 1;
                 block_dir = root_dir_cluster[i].first_block;
                 break;
             }
         }
 
         carrega_dir_struct(block_dir);
-        filename = token;
         token = strtok(NULL, dir_separator);
     }
 
@@ -822,139 +944,3 @@ void mkdir_create(char *path,int isFile){
     fflush(ptr_myfile);
     return;
 }
-
-int main(){
-    //create_file();
-    char input[5000];
-    char *comando;
-    char *parametro1;
-    char *parametro2;
-    char *token;
-
-    while(1){
-        printf(">> ");
-        scanf(" %[^\n]s",input);
-
-        /* get the first token */
-
-        comando = strtok(input, " ");
-        parametro1 = strtok(NULL," ");
-        parametro2 = strtok(NULL," ");
-
-
-        if(strcmp(comando,"help")==0){
-            if(parametro1 == NULL){
-                printf("Lista de comandos implementados:\n\n");
-                printf("init\nload\nls\nmkdir\nrmdir\ncreate\nrm\nwrite\ncat\nhelp\nman\n\n");
-                printf("Para obter informacoes mais detalhadas dos comandos digite: man <comando>\n");
-            }
-            else{
-                printf("O comando help nao possui parametros.\n");
-            }
-        }
-        else if(strcmp(comando,"man")==0){
-            if(parametro1 == NULL){
-                printf("Numero de argumentos incorreto.\n\n");
-                printf("Sintaxe: man <comando>\n");
-            }
-            else if(strcmp(parametro1,"init")==0){
-                printf("O comando init cria um arquivo chamado fat.part com 4mb de tamanho.\n");
-                printf("Estrutura do arquivo:\n");
-                printf("================\n");
-                printf("||    boot    ||\n");
-                printf("||------------||\n");
-                printf("||    FAT     ||\n");
-                printf("||------------||\n");
-                printf("||  root_dir  ||\n");
-                printf("||------------||\n");
-                printf("||   DADOS    ||\n");
-                printf("================\n");
-                printf("O arquivo esta dividido em blocos de dados, sendo que cada bloco possui o tamanho de 4kb.\n");
-                printf("O primeiro bloco contém o boot do sistema\n.");
-                printf("O segundo bloco contem a tabela FAT.\n\t Cada entrada na tabela pode conter 3 tipos diferentes de valores:\n");
-                printf("\t0x00000000 --> cluster livre\n");
-                printf("\t0x00000002 até 0xfffffffe--> posicao do proximo cluster a ser lido\n");
-                printf("\t0xffffffff --> fim de arquivo\n");
-                printf("O terceiro bloco contém o root_dir, o qual pode contem 128 entradas de diretorio(32 bytes cada).\n");
-            }
-            else if(strcmp(parametro1,"load")==0){
-                printf("O comando load carrega o arquivo fat.part para a memoria caso este exista.\n");
-            }
-            else if(strcmp(parametro1,"ls")==0){
-                printf("O comando ls lista todos os arquivos e diretórios contidos no diretório especificado.\n");
-                printf("Parametros:\n");
-                printf("-a --> lista tudo, incluindo arquivos ocultos.\n");
-                printf("-d --> lista somente diretorios.\n");
-                printf("-f --> lista somente arquivos.\n\n");
-                printf("Sintaxe: ls <caminho/do/diretorio> -<parametro>\n");
-            }
-            else if(strcmp(parametro1,"mkdir")==0){
-                printf("Cria um diretorio no path especificado, se este não existir.\n\n");
-                printf("Sintaxe: mkdir path/<nome_diretorio>\n");
-            }
-            else if(strcmp(parametro1,"rmdir")==0){
-                printf("Remove o diretorio no path especificado, se este existir.\n\n");
-                printf("Sintaxe: rmdir path/<nome_diretorio>\n");
-            }
-            else if(strcmp(parametro1,"create")==0){
-                printf("Cria um arquivo no path especificado, se este não existir.\n\n");
-                printf("Sintaxe: create path/<nome_arquivo>\n");
-            }
-            else if(strcmp(parametro1,"rm")==0){
-                printf("Remove o arquivo no path especificado, se este existir.\n\n");
-                printf("Sintaxe: rm path/<nome_arquivo>\n");
-            }
-            else if(strcmp(parametro1,"write")==0){
-                printf("Escreve a string digitada no arquivo escolhido, se este existir.\n\n");
-                printf("Sintaxe: write \"string\" path/<nome_arquivo>\n");
-            }
-            else if(strcmp(parametro1,"cat")==0){
-                printf("Lista o conteudo do arquivo escolhido, se este existir.\n\n");
-                printf("Sintaxe: cat path/<nome_arquivo>\n");
-            }else if(strcmp(comando,"exit")==0){
-                return 0;
-            }
-        }
-
-        else if(strcmp(comando,"init")==0){
-            if(parametro1 != NULL){
-                printf("O comando init nao possui parametros.\n");
-            }
-            init();
-        }
-        else if(strcmp(comando,"load")==0){
-            load();
-        }
-        else if(strcmp(comando,"ls")==0){
-            ls(parametro1,parametro2);
-        }
-        else if(strcmp(comando,"mkdir")==0){
-            mkdir_create(parametro1,1);
-            //varrer_disco_por_setor();
-        }
-        else if(strcmp(comando,"rmdir")==0){
-            rmdir(parametro1);
-        }
-        else if(strcmp(comando,"create")==0){
-            mkdir_create(parametro1,0);
-        }
-        else if(strcmp(comando,"rm")==0){
-            rmdarnis(parametro1);
-        }
-        else if(strcmp(comando,"write")==0){
-            write(parametro1,parametro2);
-        }
-        else if(strcmp(comando,"cat")==0){
-            cat(parametro1);
-        }
-        else if(strcmp(comando,"varrer")==0){
-            varrer_disco_por_setor();
-        }
-        else if(strcmp(comando,"exit")==0){
-            fclose(ptr_myfile);
-            return 0;
-        }
-    }
-    return 0;
-}
-
