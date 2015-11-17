@@ -81,10 +81,10 @@ void init()
     }
 
     if(remove("fat.part") == 0){
-        printf(">>Deletando arquivo fat\n");
+        printf(">> Deletando arquivo fat\n");
     }
 
-    printf(">>Inicializando fat.\n");
+    printf(">> Inicializando fat.\n");
 
     ptr_myfile = fopen("fat.part","w+b");
     if (!ptr_myfile)
@@ -93,15 +93,11 @@ void init()
         return;
     }
 
-    printf("Oi\n");
-
     /* inicializa o boot */
     int i;
     for(i=0; i<4096; i++){
         cluster[i] = 0xa5;
     }
-
-    printf("Oi 2\n");
 
     /* inicializa a fat */
     fat[0] = 0xffffffff; // boot_sector
@@ -110,8 +106,6 @@ void init()
     for(i=3; i<1024; i++){
         fat[i] = 0x00000000;
     }
-
-    printf("Oi 3\n");
 
     /* inicializa o root dir
         root dir é o array, já está inicializado nas váriaveis globais
@@ -126,7 +120,6 @@ void init()
     fwrite(fat , 1 , sizeof(fat) , ptr_myfile );
     fwrite(root_dir_cluster , 1 , sizeof(root_dir_cluster) , ptr_myfile );
 
-    printf("Oi 4\n");
     //restante dos 1021 setores de 4K
     for(i=0; i<4096; i++){
         cluster[i] = 0x00000000;
@@ -137,18 +130,18 @@ void init()
         fwrite(cluster , 1 , sizeof(cluster) , ptr_myfile );
     }
 
-    printf("0i 5\n");
-
     fflush(ptr_myfile);
 }
 
 void load()
 {
     ptr_myfile=fopen("fat.part","r+b");
+
     if (!ptr_myfile){
         printf("Unable to open file!");
         return;
     }
+
     //monta root_dir
     carrega_dir_struct(2);
     carrega_fat_struct();
