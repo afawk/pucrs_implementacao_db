@@ -218,8 +218,15 @@ void init_fat()
         fclose(ptr_myfile);
     }
 
-    if(remove("fat.part") == 0){
-        printf(">> Deletando arquivo fat\n");
+    // if(remove("fat.part") == 0){
+    //     printf(">> Deletando arquivo fat\n");
+    // }
+
+    ptr_myfile = fopen("fat.part","r");
+
+    if (ptr_myfile)
+    {
+        return;
     }
 
     printf(">> Inicializando fat.\n");
