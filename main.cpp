@@ -73,10 +73,10 @@ main() {
 
     while (1) {
         printf(" Mini Simulador de Sistema de Gestão de Metadados\n");
-        printf(" * string - Escrever string json\n");
-        printf(" * write - Escrever arquivo json\n");
-        printf(" * get-id - Buscar através do id em documento json\n");
-        printf(" * get-tag - Buscar através da tag e valor em documento json\n");
+        printf(" * write - Escrever string json\n");
+        printf(" * writefile - Escrever arquivo json\n");
+        printf(" * readid - Buscar através do id em documento json\n");
+        printf(" * readtag - Buscar através da tag e valor em documento json\n");
         printf(" * del - Exclui através do id em documento json\n");
         printf(" * readbatch - Insere usando multiplos arquivos json\n");
         printf("\n >> ");
@@ -84,28 +84,28 @@ main() {
         scanf(" %[^\n]s", input);
         comando = strtok(input, " ");
 
-        if (strcmp(comando, "string") == 0) {
+        if (strcmp(comando, "write") == 0) {
             printf(" String em formato json a ser gravado (entre aspas):\n");
             scanf(" %[^\n]s", inputParametro1);
             parametro1 = strtok(inputParametro1, " ");
 
             write_json_string_to_datafile(parametro1);
         }
-        else if (strcmp(comando, "write") == 0) {
+        else if (strcmp(comando, "writefile") == 0) {
             printf(" Endereço do arquivo em formato json a ser gravado:\n");
             scanf(" %[^\n]s", inputParametro1);
             parametro1 = strtok(inputParametro1, " ");
 
             write_json_file_to_datafile(parametro1);
         }
-        else if (strcmp(comando, "get-id") == 0) {
+        else if (strcmp(comando, "readid") == 0) {
             printf(" ID do documento JSON:\n");
             scanf(" %[^\n]s", inputParametro1);
             parametro1 = strtok(inputParametro1, " ");
 
             //write_json_string_to_datafile(parametro1);
         }
-        else if (strcmp(comando, "get-tag") == 0) {
+        else if (strcmp(comando, "readtag") == 0) {
             printf(" Tag e valor (separado por espaço) do documento JSON:\n");
             scanf(" %[^\n]s", inputParametro1);
             scanf(" %[^\n]s", inputParametro2);
